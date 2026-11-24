@@ -1,0 +1,30 @@
+name: messung
+# Oeffentliche Messreihe (maerkische.works, 24.11.2026): GitHubs Standard-Runner in einem OEFFENTLICHEN Repo hat 4 vCPU und
+# 16 GB. Dieselben Aufgaben wie im privaten Vergleich (vergleich/steckbrief.sh), zur selben Minute, alle 2 h bis 26.11. 12:00Z.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 */2 * * *"
+permissions:
+  contents: read
+jobs:
+  kalt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: steckbrief kalt
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = schedule ] && [ "$(date -u +%s)" -gt 1795694400 ]; then echo "Messreihe beendet (26.11. 12:00Z)"; exit 0; fi
+          bash vergleich/steckbrief.sh kalt ubuntu-24.04-oeffentlich
+  warm:
+    needs: kalt
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: steckbrief warm
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = schedule ] && [ "$(date -u +%s)" -gt 1795694400 ]; then echo "Messreihe beendet (26.11. 12:00Z)"; exit 0; fi
+          bash vergleich/steckbrief.sh warm ubuntu-24.04-oeffentlich
